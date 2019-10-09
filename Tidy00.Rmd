@@ -1,0 +1,141 @@
+---
+title: "Tidy00"
+author: "Andreas Muenchow"
+date: "10/9/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##First exercise of Data Cleaning
+``` {r package_load}
+library(dplyr)
+library(tidyr)
+#library(tidyverse)
+```
+
+To access 'filter' from 'stats' package
+'stats::filter(parameter_list_here_when_run_in_code)'
+stringsAsFactors assigns numerical value to a text string found within the csv file, "FALSE" turns this off
+
+# Read in and clean Data
+
+```{r}
+catch_original <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1",method = "libcurl"),stringsAsFactors = FALSE)
+head (catch_original)
+```
+
+# Tidy
+Pipes are defined as '%<% ... everything is backward from Unix in terms of input > output
+
+Select columns we want 'select()' the piping operator always at the end of a line in R
+``` {r}
+catch_data <- catch_original %>%
+#  select(Region,Year,Chinook)
+select(-All,-notesRegCode)
+summary(catch_data)
+
+```
+Change vlaues for chinook
+```{r}
+catch_clean <- catch_data %>%
+mutate(Chinook = as.numeric(Chinook))
+head(catch_clean,2)
+```
+Investigate the NaN with 'which' and 'is.na()'
+```{r}
+i <- which(is.na(catch_clean$Chinook))
+head(i)
+catch_original[i,]
+```
+use 'mutate' to change I to 1
+```{r}
+catch_clean <- catch_data %>%
+ mutate(Chinook = ifelse(Chinook == "I" | Chinook == "l", 1,Chinook)) %>%
+#  mutate(Chinook = ifelse(Chinook %in% c("I","l"), 1,Chinook)) %>%
+mutate(Chinook = as.numeric(Chinook))
+head(catch_clean,2)
+```
+# Move wide to tall format 'pivot_longer()' where the -c is an exclionary list
+``` {r}
+catch_long <- catch_clean %>%
+  pivot_longer(cols = -c(Region,Year),
+               names_to = "species",
+               values_to = "catch")
+head(catch_long)
+```
+```{r}
+catch_wide <- catch_long %>%
+  pivot_wider(names_from = species,
+              values_from = catch)
+head(catch_wide,2)
+```
+Rename header and units
+```{r}
+catch_long <- catch_long %>%
+  rename(catch_thousands = catch) %>%
+  mutate(catch = catch_thousands * 1000) %>%
+  select(-catch_thousands)
+head(catch_long,2)
+```
+# Summarize
+
+Calculate mean catch by region and species
+```{r}
+mean_region <- catch_long %>%
+  group_by(Region, species) %>%
+  summarise(mean_catch = mean(catch),
+            n_obs=n())
+mean_region
+```
+Example-2 mean sockeye catch by region
+```{r}
+mean_sockeye <- catch_long %>%
+  filter(species == "Sockeye") %>%
+  group_by(Region) %>%
+  summarize(mean_catch=mean(catch))
+mean_sockeye
+```
+Example-3
+```{r}
+annual_catch = catch_long %>%
+  group_by(Year) %>%
+  summarize(total_catch = sum(catch)) %>%
+  arrange(desc(total_catch))
+
+annual_catch
+```
+# Working against my will with VERY messy and disorganized data
+```{r}
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1",
+                            method = "libcurl"),
+                        stringsAsFactors = FALSE) %>%
+  select(code,mgmtArea)
+head(region_defs)
+```
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by=c("Region" = "code"))
+head(catch_joined)
+```
+```{r}
+region_defs <- region_defs %>%
+  rename(Region = code)
+catch_joined <- left_join(catch_long, region_defs, by = "Region")
+head(catch_joined)
+```
+# New Tools
+Toy data frame
+```{r}
+dates_df <- data.frame(date = c("5/24/1930",
+                                "5/25/1930",
+                                "5/26/1930",
+                                "5/27/1930",
+                                "5/28/1930"),
+                       stringsAsFactors = FALSE)
+
+dates_df %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/", remove=FALSE) %>%
+unite(date_2,year,month,day,sep="-")
+```
