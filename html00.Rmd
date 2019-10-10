@@ -14,7 +14,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 #library(leaflet)
-#library(DT)
+library(DT)
 #library(sf)
 ```
 # First html from RStudio
@@ -43,11 +43,24 @@ ggplot(data=annual_esc, mapping=aes(x=Species,y=escapement,fill=SASAP.Region)) +
 ```{r}
 my_theme = theme_bw() +
   theme(legend.position = "bottom")
-ggplot(data=filter(annual_esc,SASAP.Region == "Kodiak"),
+ggplot(data=filter(annual_esc,SASAP.Region != "Kodiak"),
        mapping=aes(x=Year,y=escapement,color=Species)) +
   geom_point() +
   geom_line() +
-  ylab("escapement,  Fish") +
+  facet_wrap(~SASAP.Region,scales="free_y",ncol=2) +
+
+    ylab("escapement,  Fish") +
   my_theme
 
+#ggsave("/Users/a2/Desktop/escapement.png",fig1,width=12, height=7, units="in"")
+```
+# Map Sampling locations by lat lon
+```{r}
+location <- esc %>%
+  distinct(Location,Latitude,Longitude) %>%
+  drop_na()
+head(location)
+```
+```{r}
+datatable(location)
 ```
