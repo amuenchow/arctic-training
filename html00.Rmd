@@ -52,7 +52,7 @@ ggplot(data=filter(annual_esc,SASAP.Region != "Kodiak"),
     ylab("escapement,  Fish") +
   my_theme
 
-#ggsave("/Users/a2/Desktop/escapement.png",fig1,width=12, height=7, units="in")
+ggsave("/Users/a2/Desktop/escapement.png",width=12, height=7, units="in")
 ```
 # Map Sampling locations by lat lon
 ```{r}
@@ -70,3 +70,4 @@ leaflet(location) %>%
   addTiles() %>%
   addCircleMarkers(lng = ~ Longitude, lat = ~ Latitude, popup = ~ Location)
 ```
+# Static Maps of geo-spatial data using 'sf' package (section 13.5)
