@@ -8,5 +8,46 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+Remove warning and messages only for production sit, terrible for debugging and code development
+```{r warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+#library(leaflet)
+#library(DT)
+#library(sf)
+```
 # First html from RStudio
+```{r}
+
+#esc <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e")
+#write.csv(esc,"/Users/a2/Desktop/Fish.dat")
+esc <- read.csv("/Users/a2/Desktop/Fish.dat")
+head(esc,2)
+```
+```{r}
+annual_esc <- esc %>%
+  separate(sampleDate, c("Year","Month","Day"), sep="-") %>%
+  mutate(Year=as.numeric(Year)) %>%
+  group_by(Species,SASAP.Region,Year) %>%
+  summarize(escapement = sum(DailyCount)) %>%
+#  filter(Species %in% species_list)
+  filter(Species %in% c("Chinook","Pink","Sockeye"))
+head(annual_esc)
+```
+The aes sets up the use of columns to be plotted, if color is a column value, then put it in aes, if not, then put it outside in 'geom_col'
+```{r}
+ggplot(data=annual_esc, mapping=aes(x=Species,y=escapement,fill=SASAP.Region)) +
+  geom_col()
+```
+```{r}
+my_theme = theme_bw() +
+  theme(legend.position = "bottom")
+ggplot(data=filter(annual_esc,SASAP.Region == "Kodiak"),
+       mapping=aes(x=Year,y=escapement,color=Species)) +
+  geom_point() +
+  geom_line() +
+  ylab("escapement,  Fish") +
+  my_theme
+
+```
