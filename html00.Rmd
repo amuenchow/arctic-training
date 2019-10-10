@@ -13,7 +13,7 @@ Remove warning and messages only for production sit, terrible for debugging and 
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-#library(leaflet)
+library(leaflet)
 library(DT)
 #library(sf)
 ```
@@ -52,7 +52,7 @@ ggplot(data=filter(annual_esc,SASAP.Region != "Kodiak"),
     ylab("escapement,  Fish") +
   my_theme
 
-#ggsave("/Users/a2/Desktop/escapement.png",fig1,width=12, height=7, units="in"")
+#ggsave("/Users/a2/Desktop/escapement.png",fig1,width=12, height=7, units="in")
 ```
 # Map Sampling locations by lat lon
 ```{r}
@@ -63,4 +63,10 @@ head(location)
 ```
 ```{r}
 datatable(location)
+```
+# Leaflet
+```{r}
+leaflet(location) %>%
+  addTiles() %>%
+  addCircleMarkers(lng = ~ Longitude, lat = ~ Latitude, popup = ~ Location)
 ```
