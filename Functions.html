@@ -373,42 +373,79 @@ summary {
 <div id="assemble-functions-into-an-r-file-then-call-them-here-as-source" class="section level1">
 <h1>Assemble functions into an R-file, then call them here as ‘source’</h1>
 <pre class="r"><code>library(roxygen2)
-source(&quot;conversions.R&quot;)</code></pre>
+source(&quot;conversions.R&quot;)
+library(mytools)</code></pre>
 </div>
 <div id="functions" class="section level1">
 <h1>Functions</h1>
 <p>DRY - Do not repeat yourself.</p>
 <pre class="r"><code>t_f &lt;- c(212,32,0)</code></pre>
-<p>Write function `{r}</p>
-<p>#’ Convert from Fahrenheit to Celsius</p>
-<p>#’</p>
-<p>#’ A more detailed explanation of how function works</p>
-<p>#’</p>
-<p>#’ <span class="citation">@param</span> fahr represents numeric input in Fahrenheit</p>
-<p>#’ <span class="citation">@return</span> temperature in Celsius</p>
-<p>#’ <span class="citation">@export</span></p>
-<p>#’ <span class="citation">@expample</span> fahr_to_celsius(212)</p>
-<p>#’ fahr_to_celsius &lt;- function(fahr) { # stopifnot(!is.numeric(fahr)) celsius &lt;- (fahr-32)*5/9 return(celsius) } `</p>
+<p>Write function (see ‘conversions.R’)</p>
 <pre class="r"><code>celsius1 &lt;- fahr_to_celsius(t_f[1])
 celsius1 &lt;- fahr_to_celsius(t_f)
 celsius1</code></pre>
 <pre><code>## [1] 100.00000   0.00000 -17.77778</code></pre>
 <p>Inverse</p>
-<pre class="r"><code>#' A more detailed explanation of how function works
-#'
-#' @param celsius represents numeric input in Fahrenheit
-#' @return temperature in Fahrenheit
-#' @export
-#' @expample fahr_to_celsius(0)
-#'
-celsius_to_fahr &lt;- function(celsius) {
-#  stopifnot(!is.numeric(fahr))
-  fahr &lt;- celsius*9/5+32
-  return(fahr)
-}
-  fahr &lt;- celsius_to_fahr(celsius1)
-  fahr</code></pre>
-<pre><code>## [1] 212  32   0</code></pre>
+<pre class="r"><code>celsius_to_fahr(0)</code></pre>
+<pre><code>## [1] 32</code></pre>
+<pre class="r"><code>environment_info(&quot;Ping-3&quot;)</code></pre>
+<pre><code>## ─ Session info ──────────────────────────────────────────────────────────
+##  setting  value                       
+##  version  R version 3.6.1 (2019-07-05)
+##  os       macOS Mojave 10.14.6        
+##  system   x86_64, darwin15.6.0        
+##  ui       X11                         
+##  language (EN)                        
+##  collate  en_US.UTF-8                 
+##  ctype    en_US.UTF-8                 
+##  tz       America/Phoenix             
+##  date     2019-10-10                  
+## 
+## ─ Packages ──────────────────────────────────────────────────────────────
+##  package     * version    date       lib source        
+##  assertthat    0.2.1      2019-03-21 [1] CRAN (R 3.6.0)
+##  backports     1.1.5      2019-10-02 [1] CRAN (R 3.6.0)
+##  callr         3.3.2      2019-09-22 [1] CRAN (R 3.6.0)
+##  cli           1.1.0      2019-03-19 [1] CRAN (R 3.6.0)
+##  commonmark    1.7        2018-12-01 [1] CRAN (R 3.6.0)
+##  crayon        1.3.4      2017-09-16 [1] CRAN (R 3.6.0)
+##  desc          1.2.0      2018-05-01 [1] CRAN (R 3.6.0)
+##  devtools      2.2.1      2019-09-24 [1] CRAN (R 3.6.0)
+##  digest        0.6.21     2019-09-20 [1] CRAN (R 3.6.0)
+##  ellipsis      0.3.0      2019-09-20 [1] CRAN (R 3.6.0)
+##  evaluate      0.14       2019-05-28 [1] CRAN (R 3.6.0)
+##  fs            1.3.1      2019-05-06 [1] CRAN (R 3.6.0)
+##  glue          1.3.1      2019-03-12 [1] CRAN (R 3.6.0)
+##  htmltools     0.4.0      2019-10-04 [1] CRAN (R 3.6.0)
+##  knitr         1.25       2019-09-18 [1] CRAN (R 3.6.0)
+##  magrittr      1.5        2014-11-22 [1] CRAN (R 3.6.0)
+##  memoise       1.1.0      2017-04-21 [1] CRAN (R 3.6.0)
+##  mytools     * 0.0.0.9000 2019-10-10 [1] local         
+##  pkgbuild      1.0.6      2019-10-09 [1] CRAN (R 3.6.1)
+##  pkgload       1.0.2      2018-10-29 [1] CRAN (R 3.6.0)
+##  prettyunits   1.0.2      2015-07-13 [1] CRAN (R 3.6.0)
+##  processx      3.4.1      2019-07-18 [1] CRAN (R 3.6.0)
+##  ps            1.3.0      2018-12-21 [1] CRAN (R 3.6.0)
+##  R6            2.4.0      2019-02-14 [1] CRAN (R 3.6.0)
+##  Rcpp          1.0.2      2019-07-25 [1] CRAN (R 3.6.0)
+##  remotes       2.1.0      2019-06-24 [1] CRAN (R 3.6.0)
+##  rlang         0.4.0      2019-06-25 [1] CRAN (R 3.6.0)
+##  rmarkdown     1.16       2019-10-01 [1] CRAN (R 3.6.0)
+##  roxygen2    * 6.1.1      2018-11-07 [1] CRAN (R 3.6.0)
+##  rprojroot     1.3-2      2018-01-03 [1] CRAN (R 3.6.0)
+##  sessioninfo   1.1.1      2018-11-05 [1] CRAN (R 3.6.0)
+##  stringi       1.4.3      2019-03-12 [1] CRAN (R 3.6.0)
+##  stringr       1.4.0      2019-02-10 [1] CRAN (R 3.6.0)
+##  testthat      2.2.1      2019-07-25 [1] CRAN (R 3.6.0)
+##  usethis       1.5.1      2019-07-04 [1] CRAN (R 3.6.0)
+##  withr         2.1.2      2018-03-15 [1] CRAN (R 3.6.0)
+##  xfun          0.10       2019-10-01 [1] CRAN (R 3.6.0)
+##  xml2          1.2.2      2019-08-09 [1] CRAN (R 3.6.0)
+##  yaml          2.2.0      2018-07-25 [1] CRAN (R 3.6.0)
+## 
+## [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library
+## [1] &quot;The message was:  Ping-3&quot;</code></pre>
+<p>#Packages Thes must be constructed from a different directory</p>
 </div>
 
 

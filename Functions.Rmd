@@ -12,38 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(roxygen2)
 source("conversions.R")
+library(mytools)
 ```
 # Functions
 DRY - Do not repeat yourself.
 ```{r}
 t_f <- c(212,32,0)
 ```
-Write function
-`{r}
-
-#' Convert from Fahrenheit to Celsius
-
-#'
-
-#' A more detailed explanation of how function works
-
-#'
-
-#' @param fahr represents numeric input in Fahrenheit
-
-#' @return temperature in Celsius
-
-#' @export
-
-#' @expample fahr_to_celsius(212)
-
-#'
-fahr_to_celsius <- function(fahr) {
-#  stopifnot(!is.numeric(fahr))
-  celsius <- (fahr-32)*5/9
-  return(celsius)
-}
-`
+Write function (see 'conversions.R')
 ```{r}
 celsius1 <- fahr_to_celsius(t_f[1])
 celsius1 <- fahr_to_celsius(t_f)
@@ -51,18 +27,8 @@ celsius1
 ```
 Inverse
 ```{r}
-#' A more detailed explanation of how function works
-#'
-#' @param celsius represents numeric input in Fahrenheit
-#' @return temperature in Fahrenheit
-#' @export
-#' @expample fahr_to_celsius(0)
-#'
-celsius_to_fahr <- function(celsius) {
-#  stopifnot(!is.numeric(fahr))
-  fahr <- celsius*9/5+32
-  return(fahr)
-}
-  fahr <- celsius_to_fahr(celsius1)
-  fahr
+celsius_to_fahr(0)
+environment_info("Ping-3")
 ```
+#Packages
+Thes must be constructed from a different directory

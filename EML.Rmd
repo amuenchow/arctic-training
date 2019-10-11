@@ -15,8 +15,6 @@ library(shinyjs)
 library(htmlwidgets)
 library(EML)
 library(tidyverse)
-library(dataone)
-library(datapack)
 ```
 # Testing .csh
 ```{csh 01_chunk}
@@ -40,19 +38,45 @@ tail(wind_original,1)
 # EML File Creation
 
 In a first step, I assemble the static header information using the template of [Clarke2019](http://training.arcticdata.io/materials/arctic-data-center-training/programming-metadata-and-data-publishing.html) and there more specifically in section 17.2 "Creating Metadata"
+```{r 03.1_chunk}
+#custom_units <-
+#  data.frame(id = "hectoPascal",
+#             unitType = "pressure",
+#             parentSI = "pascal",
+#             multiplierSI = 10000,
+#             description = "hectoPascal")
+get_unitList()
+```
+```{r 03.0_chunk}
+me <- list(givenName="Andreas",
+           surname="Muenchow")
+me$givenName
+```
+helper function syntax: 'eml$elementName()'
+
+Minimal Valid EML
+
+The Package-Id will become the DOI
 ```{r 03_chunk}
 
-me <- eml$creator(individualName = eml$individualName(givenName = "Andreas",
-                                                      surName = "Muenchow"),
-                  organizationName = "University of Delaware",
-                  electronicMailAddress = "muenchow@udel.edu",
-                  userId = list(directory = "https://orcid.org",
-                                userId = "https://orcid.org/0000-0001-8360-5686"))
-doc <- list(packageId = "dataset-1", system="local",
-            dataset = eml$dataset(title = "A minimal valid EML dataset",
+me <- eml$creator(individualName = eml$individualName(
+  givenName = "Andreas",
+  surName = "Muenchow"),
+  organizationName = "University of Delaware",
+  electronicMailAddress = "muenchow@udel.edu",
+  userId = list(directory = "https://orcid.org",
+  userId = "https://orcid.org/0000-0001-8360-5686"))
+
+doc <- list(packageId = "dataset-1",
+            system="local",
+            dataset = eml$dataset(title = "Petermann Glacier Automated Weather Station",
                                   creator = me,
                                   contact = me))
-doc$dataset$abstract <- "A brief but comprehensive description who, what, where, when, and why."
+
+#eml_validate(doc)
+```
+```{r}
+doc$dataset$abstract <- "A brief description at least 200 words."
 doc$dataset$methods <- set_methods("/Users/a2/ArcticDataCenter/methods.md")
 #doc$dataset$methods
 doc$dataset$coverage <- set_coverage(beginDate = 2015-08-20,
@@ -62,14 +86,13 @@ doc$dataset$coverage <- set_coverage(beginDate = 2015-08-20,
                                      eastBoundingCoordinate = -58,
                                      northBoundingCoordinate = 80.75,
                                      southBoundingCoordinate = 80.50)
-
+# Any other type of documention such as .pdf or .csh or .f or any graphics
 doc$dataset$otherEntity <- eml$otherEntity(entityName = "/Users/a2/data/PG-Final/AWS/wind.csh",
                                           entityDescription = "Data processing script",
                                           entityType = "application/csh")
 
 doc$dataset$otherEntity$physical <- set_physical("/Users/a2/data/PG-Final/AWS/wind.csh")
 eml_validate(doc)
-#write_eml(doc,"/Users/a2/Desktop/example00.xml")
 ```
 In this second step, I attempt to define the dataTable. This was tricky and I ended up reprocessing the data in 'wind.awk' called via 'wind.csh' to generate a Date-Time string that conformed to the specification of attributes.
 ```{r 04_chunk}
@@ -97,12 +120,12 @@ atts <- data.frame(attributeName = c("Decimal_Time",
                                            7,
                                            8),
                    
-                   unit = c("DayOfYear",
+                   unit = c("nominalDay",
                             "metersPerSecond",
                             "metersPerSecond",
                             "metersPerSecond",
                             "degree",
-                            "pascal",
+                            "millibar",
                             NA,
                             NA),
                    numberType = c("real",
@@ -147,12 +170,17 @@ doc$dataset$dataTable <- eml$dataTable(entityName = "/Users/a2/data/PG-Final/AWS
                                        entityDescription = "AWS wind data",
                                        physical = form00,
                                        attributeList = atts2)
+#t <- shiny_attributes(data=read.csv("/Users/a2data/PG-Final/AWS/wind2015.dat))
 eml_validate(doc)
 write_eml(doc,"/Users/a2/Desktop/example00.xml")
 ```
 # Arctic Data Center Uploads
-The third step is to establish communication with DataOne after the DataOne token is downloaded from Arctic Data Center and it has been pasted into the RStudio Console. This establishes communication; the token acts like a password; and Knit will break, because it does not have the token. The token will execute from the console using command 
+The third step is to establish communication with DataOne after the DataOne token is downloaded from Arctic Data Center and it has been pasted into the RStudio Console. This establishes communication; the token acts like a password; and Knit will break, because it does not have the token. The token will execute from the console using command.
+
+This should ideally be in a very different type of script.
 ```{r 05_chunk}
+library(dataone)
+library(datapack)
 d1c <- D1Client("STAGING", "urn:node:mnTestARCTIC")
 mn <- d1c@mn
 dp <- new("DataPackage")
@@ -179,6 +207,7 @@ write_eml(doc,"/Users/a2/Desktop/example01.xml")
 Build the entire package to be delivered to Arctic Data Center
 ```{r 07_chunk}
 # Add the metadata document to the package
+# https://cn.dataone.org/cn/v2/formats
 metadataObj <- new("DataObject",
                    id = metadata_id,
                    format ="eml://ecoinformatics.org/eml-2.1.1",
@@ -192,6 +221,16 @@ sourceObj <- new("DataObject",
                  filename = "/Users/a2/data/PG-Final/AWS/wind2015.dat")
 
 dp <- addMember(dp, sourceObj, mo = metadataObj)
+dp
+
+# Add our script to the package
+scriptObj <- new("DataObject",
+                 id = script_id,
+                 format = "application/csh",
+                 filename = "/Users/a2/data/PG-Final/AWS/wind.csh")
+
+dp <- addMember(dp, scriptObj, mo = metadataObj)
+dp <- describeWorkflow(dp, sources = sourceObj, program = scriptObj)
 dp
 #packageId <- uploadDataPackage(d1c,dp,public=TRUE)
 ```
